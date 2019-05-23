@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.n3r.idworker.Sid;
 import org.slf4j.Logger;
@@ -21,6 +22,8 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.request.AlipayTradePrecreateRequest;
+import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.sihai.pojo.Orders;
 import com.sihai.pojo.Product;
 import com.sihai.service.OrdersService;
@@ -28,6 +31,7 @@ import com.sihai.service.ProductService;
 import com.sihai.utils.AlipayConfig;
 import com.sihai.utils.LeeJSONResult;
 import com.sihai.utils.OrderStatusEnum;
+import com.sihai.wx.entity.PreOrderResult;
 
 /**
  *
@@ -208,9 +212,70 @@ public class AlipayController {
 				+ "\"product_code\":\"FAST_INSTANT_TRADE_PAY\"}");
 
 		//请求
-		String result = alipayClient.pageExecute(alipayRequest).getBody();
+		String result = alipayClient.pageExecute(alipayRequest,"201905BB5962037c6ab34674b5469403ddc1cX76").getBody();
 
 		return result;
+	}
+	
+	/**
+	 * 
+	 * @Description: 生成预付单
+	 * @param amount
+	 * @param title
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 * 
+	 * @author leechenxiang
+	 * @date 2017年8月31日 下午4:02:01
+	 */
+	@RequestMapping(value = "/createPreOrder")
+	public ModelAndView createPreOrder(String orderId, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		Orders order = orderService.getOrderById(orderId);
+		
+		Product product = productService.getProductById(order.getProductId());
+		//获得初始化的AlipayClient
+		AlipayClient alipayClient = new DefaultAlipayClient(AlipayConfig.gatewayUrl, AlipayConfig.app_id, AlipayConfig.merchant_private_key, "json", AlipayConfig.charset, AlipayConfig.alipay_public_key, AlipayConfig.sign_type);
+
+		//设置请求参数
+		AlipayTradePrecreateRequest alipayRequest = new AlipayTradePrecreateRequest();
+		alipayRequest.setReturnUrl(AlipayConfig.return_url);
+		alipayRequest.setNotifyUrl(AlipayConfig.notify_url);
+
+		//商户订单号，商户网站订单系统中唯一订单号，必填
+		String out_trade_no = orderId;
+		//付款金额，必填
+		String total_amount = order.getOrderAmount();
+		//订单名称，必填
+		String subject = product.getName();
+		//商品描述，可空
+		String body = "用户订购商品个数：" + order.getBuyCounts();
+
+		// 该笔订单允许的最晚付款时间，逾期将关闭交易。取值范围：1m～15d。m-分钟，h-小时，d-天，1c-当天（1c-当天的情况下，无论交易何时创建，都在0点关闭）。 该参数数值不接受小数点， 如 1.5h，可转换为 90m。
+		String timeout_express = "1c";
+
+		alipayRequest.setBizContent("{\"out_trade_no\":\""+ out_trade_no +"\","+
+				"\"seller_id\":\"2088531123072440\"," +
+				"\"total_amount\":\""+ total_amount +"\","+
+				"\"subject\":\""+ subject +"\","+
+				"\"body\":\""+ body +"\","+
+//				"\"timeout_express\":\""+ timeout_express +"\","+
+				"\"qr_code_timeout_express\":\"90m\"," +
+				"\"product_code\":\"FACE_TO_FACE_PAYMENT\"}");
+		
+		AlipayTradePrecreateResponse alipayresponse = alipayClient.execute(alipayRequest,"201905BBc2805fc568f748ee9327647956df5X44");
+		ModelAndView mv = new ModelAndView("alipayQrCode");
+		mv.addObject("success", alipayresponse.isSuccess());
+		mv.addObject("msg", alipayresponse.getMsg());
+		if(alipayresponse.isSuccess()){
+			mv.addObject("qrCodeUrl", alipayresponse.getQrCode());
+			System.out.println("调用成功");
+		} else {
+			System.out.println("调用失败");
+		}
+		return mv;
 	}
 
 	/**

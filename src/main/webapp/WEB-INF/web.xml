@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	id="taotao" version="2.5">
 
-	<display-name>itzixi-maven-ssm-alipay</display-name>
+	<display-name>mm</display-name>
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
@@ -40,7 +40,7 @@
 	
 	<!-- springmvc的前端控制器 -->
 	<servlet>
-		<servlet-name>itzixi-maven-ssm-alipay</servlet-name>
+		<servlet-name>mm</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<!-- contextConfigLocation不是必须的， 如果不配置contextConfigLocation， springmvc的配置文件默认在：WEB-INF/servlet的name+"-servlet.xml" -->
 		<init-param>
@@ -52,7 +52,7 @@
 	
 	<!-- 会拦截所有请求包括静态资源。需要在springmvc.xml中添加静态资源的映射 -->
 	<servlet-mapping>
-		<servlet-name>itzixi-maven-ssm-alipay</servlet-name>
+		<servlet-name>mm</servlet-name>
 		<url-pattern>*.action</url-pattern>
 	</servlet-mapping>
 

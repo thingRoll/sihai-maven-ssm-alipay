@@ -35,8 +35,8 @@
         	</tr>
         	</tr>
         		<td>
-        			<input type="submit" value="前往支付宝进行支付">
-        			
+<!--         			<input type="submit" value="前往支付宝进行网站支付"> -->
+        			<input type="button" value="支付宝扫码支付" onclick="alipayDisplay()">
         			<input type="button" value="微信扫码支付" onclick="wxpayDisplay()">
         		</td>
         	</tr>
@@ -58,6 +58,14 @@
 		var hdnContextPath = $("#hdnContextPath").val();
 		
 		$("#payForm").attr("action", hdnContextPath + "/wxpay/createPreOrder.action");
+		$("#payForm").submit();
+	}
+	function alipayDisplay() {
+		debugger;
+		
+		var hdnContextPath = $("#hdnContextPath").val();
+		
+		$("#payForm").attr("action", hdnContextPath + "/alipay/createPreOrder.action");
 		$("#payForm").submit();
 	}
 

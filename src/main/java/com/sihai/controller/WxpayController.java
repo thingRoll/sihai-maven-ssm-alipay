@@ -78,7 +78,7 @@ public class WxpayController {
 		// 统一下单
 		PreOrderResult preOrderResult = wxOrderService.placeOrder(body, out_trade_no, total_fee);
 		
-		ModelAndView mv = new ModelAndView("payQrCode");
+		ModelAndView mv = new ModelAndView("wxpayQrCode");
 		mv.addObject("qrCodeUrl", preOrderResult.getCode_url());
 		
 		return mv;
